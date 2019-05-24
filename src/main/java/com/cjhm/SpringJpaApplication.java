@@ -29,8 +29,8 @@ public class SpringJpaApplication {
 			lists.add(article);
 			lists.add(article2);
 			lists.add(article3);
-			service.indexing(lists);
-			List<Document> dList =  service.search("ttt");
+//			service.indexing(lists);
+			List<Document> dList =  service.multiSearch("cont");
 			dList.forEach(System.out::println);
 		};
 	}

@@ -16,6 +16,7 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
@@ -65,6 +66,30 @@ public class SearchService {
 		QueryParser parser = new QueryParser(field.toLowerCase(), analyzer);
 		parser.setAllowLeadingWildcard(true);
 		Query query = parser.parse(queryString+"*");
+		
+		TopDocs hits = searcher.search(query, 10);
+		System.out.println("hits.scoreDocs : "+hits.scoreDocs.length);
+		for(ScoreDoc sDoc : hits.scoreDocs) {
+			Document _doc = searcher.doc(sDoc.doc);
+			docList.add(_doc);
+		}
+		directory.close();
+//		analyzer.close();
+		return docList;
+	}
+	public List<Document> multiSearch(String queryString) throws IOException, ParseException {
+		File file = new File(idxDir);
+		Directory directory = FSDirectory.open(file.toPath());
+		
+		List<Document> docList = new ArrayList<>();
+		IndexReader reader = DirectoryReader.open(FSDirectory.open(file.toPath()));
+		IndexSearcher searcher = new IndexSearcher(reader);
+		
+//		QueryParser parser = new QueryParser(field.toLowerCase(), analyzer);
+		String[] fields = {"title","content"};
+		MultiFieldQueryParser multiParser = new MultiFieldQueryParser(fields, analyzer);
+		multiParser.setAllowLeadingWildcard(true);
+		Query query = multiParser.parse(queryString+"*");
 		
 		TopDocs hits = searcher.search(query, 10);
 		System.out.println("hits.scoreDocs : "+hits.scoreDocs.length);
